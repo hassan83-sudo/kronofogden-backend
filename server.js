@@ -1,18 +1,34 @@
 const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
-const debtRoutes = require("./routes/debtRoutes");
+const cors = require("cors");
 
 const app = express();
-mongoose.connect("mongodb+srv://hassan83_db_user:Test12345@kronofogden.ni6d17h.mongodb.net/?appName=Kronofogden")
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Routes
+const debtRoutes = require("./routes/debtRoutes");
 app.use("/api/debts", debtRoutes);
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.log("MongoDB connection error:", error);
+  });
+
+// Root route
+app.get("/", (req, res) => {
+  res.send("Kronofogden Backend is running");
+});
+
+// PORT fix för Render + lokal dator
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
