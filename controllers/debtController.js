@@ -20,7 +20,6 @@ exports.payDebt = async (req, res) => {
     await Debt.findByIdAndUpdate(req.params.id, {
       paid: true
     });
-
     res.json({ message: "Debt marked as paid" });
   } catch (err) {
     res.status(500).json(err);
