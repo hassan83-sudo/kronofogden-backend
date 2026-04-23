@@ -1,27 +1,90 @@
-const Debt = require("../models/debtModel");
+const Debt = require("../models/Debt");
 
+// Hämta alla skulder
 exports.getDebts = async (req, res) => {
-  const debts = await Debt.find();
-  res.json(debts);
+  try {
+    const debts = await Debt.find().sort({ createdAt: -1 });
+    res.json(debts);
+  } catch (error) {
+    res.status(500).json({ error: "Kunde inte hämta skulder" });
+  }
 };
 
+// Lägg till skuld
 exports.addDebt = async (req, res) => {
-  const newDebt = new Debt({
-    name: req.body.name,
-    amount: req.body.amount
-  });
+  try {
+    const { name, amount, priority, monthlyPayment } = req.body;
 
-  await newDebt.save();
-  res.json(newDebt);
+    const newDebt = new Debt({
+      name,
+      amount,
+      priority: priority || "medium",
+      monthlyPayment: monthlyPayment || 0
+    });
+
+    await newDebt.save();
+    res.json(newDebt);
+  } catch (error) {
+    res.status(500).json({ error: "Kunde inte lägga till skuld" });
+  }
 };
 
+// Uppdatera skuld (REDIGERA)
+exports.updateDebt = async (req, res) => {
+  try {
+    const { name, amount, priority, monthlyPayment } = req.body;
+
+    const updatedDebt = await Debt.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        amount,
+        priority,
+        monthlyPayment
+      },
+      { new: true }
+    );
+
+    res.json(updatedDebt);
+  } catch (error) {
+    res.status(500).json({ error: "Kunde inte uppdatera skuld" });
+  }
+};
+
+// Betala skuld
 exports.payDebt = async (req, res) => {
   try {
-    await Debt.findByIdAndUpdate(req.params.id, {
-      paid: true
-    });
-    res.json({ message: "Debt marked as paid" });
-  } catch (err) {
-    res.status(500).json(err);
+    const debt = await Debt.findById(req.params.id);
+
+    if (!debt) {
+      return res.status(404).json({ error: "Skuld hittades inte" });
+    }
+
+    debt.paid = true;
+    await debt.save();
+
+    res.json(debt);
+  } catch (error) {
+    res.status(500).json({ error: "Kunde inte markera som betald" });
+  }
+};
+
+// Ta bort skuld
+exports.deleteDebt = async (req, res) => {
+  try {
+    await Debt.findByIdAndDelete(req.params.id);
+    res.json({ message: "Skuld borttagen" });
+  } catch (error) {
+    res.status(500).json({ error: "Kunde inte ta bort skuld" });
+  }
+};
+
+// Auto (om du använder den)
+exports.autoDebt = async (req, res) => {
+  try {
+    const debts = await Debt.find();
+    res.json(debts);
+  } catch (error) {
+    res.status(500).json({ error: "Auto-funktion misslyckades" });
   }
 };
