@@ -1,4 +1,4 @@
-require("dotenv").config(); // 👈 DEN HÄR RADEN ÄR NY
+require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -12,7 +12,10 @@ app.use(express.json());
 
 // Routes
 const debtRoutes = require("./routes/debtRoutes");
+const authRoutes = require("./routes/authRoutes"); // 👈 NY
+
 app.use("/api/debts", debtRoutes);
+app.use("/api/auth", authRoutes); // 👈 NY
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
