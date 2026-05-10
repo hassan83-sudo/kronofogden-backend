@@ -1,9 +1,14 @@
 const Debt = require("../models/Debt");
 
-// Hämta alla skulder
+// Hämta skulder / filtrera per user
 exports.getDebts = async (req, res) => {
   try {
-    const debts = await Debt.find().sort({ createdAt: -1 });
+    const userId = req.query.userId;
+
+    const query = userId ? { userId } : {};
+
+    const debts = await Debt.find(query).sort({ createdAt: -1 });
+
     res.json(debts);
   } catch (error) {
     res.status(500).json({ error: "Kunde inte hämta skulder" });
@@ -13,13 +18,14 @@ exports.getDebts = async (req, res) => {
 // Lägg till skuld
 exports.addDebt = async (req, res) => {
   try {
-    const { name, amount, priority, monthlyPayment } = req.body;
+    const { name, amount, priority, monthlyPayment, userId } = req.body;
 
     const newDebt = new Debt({
       name,
       amount,
       priority: priority || "medium",
-      monthlyPayment: monthlyPayment || 0
+      monthlyPayment: monthlyPayment || 0,
+      userId: userId || null // 🔥 viktigt
     });
 
     await newDebt.save();
@@ -29,7 +35,7 @@ exports.addDebt = async (req, res) => {
   }
 };
 
-// Uppdatera skuld (REDIGERA)
+// Uppdatera skuld
 exports.updateDebt = async (req, res) => {
   try {
     const { name, amount, priority, monthlyPayment } = req.body;

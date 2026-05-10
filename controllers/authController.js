@@ -6,6 +6,12 @@ exports.register = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
     const hashed = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -15,8 +21,12 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "User created" });
+    res.json({
+      message: "User created",
+      userId: user._id
+    });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Register failed" });
   }
 };
@@ -43,8 +53,13 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    res.json({
+      message: "Login success",
+      token,
+      userId: user._id
+    });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Login failed" });
   }
 };

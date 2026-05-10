@@ -22,6 +22,30 @@ const debtSchema = new mongoose.Schema(
     monthlyPayment: {
       type: Number,
       default: 0
+    },
+
+    // 🔥 LÄGG TILL DENNA
+    userId: {
+      type: String,
+      default: null,
+      index: true
+    },
+
+    requestedMoreTime: {
+      type: Boolean,
+      default: false
+    },
+    timeStatus: {
+      type: String,
+      default: null
+    },
+    timeApproved: {
+      type: Boolean,
+      default: false
+    },
+    deadline: {
+      type: Date,
+      default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     }
   },
   {
