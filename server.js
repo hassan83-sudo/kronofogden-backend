@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -13,9 +15,10 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-const JWT_SECRET = "SECRET_KEY";
+const JWT_SECRET = process.env.JWT_SECRET || "SECRET_KEY";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/betalningsapp";
 
-mongoose.connect("mongodb://127.0.0.1:27017/betalningsapp")
+mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB error:", err));
 
@@ -125,7 +128,10 @@ function adminOnly(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.json({
+    message: "BetalningsApp backend körs",
+    status: "OK"
+  });
 });
 
 // REGISTER
@@ -314,6 +320,8 @@ app.delete("/api/invoices/:id", auth, adminOnly, async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server körs på http://127.0.0.1:3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server körs på port ${PORT}`);
 });
